@@ -1,4 +1,6 @@
 let point = 0;
+const GAY = 8;
+const BIAN = 9;
 function main(param) {
     let scene = new g.Scene({
         game: g.game,
@@ -77,7 +79,8 @@ function main(param) {
 function showCouple(label, scene) {
     let human_width = 50;
     let start_x = g.game.random.get(0, g.game.width - human_width * 2)
-    let boy = new g.FilledRect({
+    let lgbtq = g.game.random.get(0, 9);
+    let human1 = new g.FilledRect({
         scene: scene,
         cssColor: "blue",
         width: human_width,
@@ -86,9 +89,7 @@ function showCouple(label, scene) {
         y: 0,
         opacity: 1
     });
-    boy.touchable = true;
-    scene.append(boy);
-    let girl = new g.FilledRect({
+    let human2 = new g.FilledRect({
         scene: scene,
         cssColor: "red",
         width: human_width,
@@ -97,35 +98,48 @@ function showCouple(label, scene) {
         y: 0,
         opacity: 1
     });
-    girl.touchable = true;
-    scene.append(girl);
+    if (lgbtq === GAY) {
+        human2.cssColor = "blue"
+        human2.modified();
+    } else if (lgbtq === BIAN) {
+        human1.cssColor = "red"
+        human1.modified();
+    }
+    human1.touchable = true;
+    human2.touchable = true;
+    scene.append(human1);
+    scene.append(human2);
     scene.onUpdate.add(() => {
-        boy.y += 3;
-        girl.y += 3;
-        if (g.game.height < boy.y) {
-            boy.y = 0;
-            girl.y = 0;
+        human1.y += 3;
+        human2.y += 3;
+        if (g.game.height < human1.y) {
+            human1.y = 0;
+            human2.y = 0;
         }
-        boy.modified();
-        girl.modified();
+        human1.modified();
+        human1.modified();
     });
-    boy.onPointUp.add(() => {
-        destroyRect(boy, girl, label);
+    human1.onPointUp.add(() => {
+        destroyRect(lgbtq, human1, human2, label);
     });
-    girl.onPointUp.add(() => {
-        destroyRect(boy, girl, label);
+    human2.onPointUp.add(() => {
+        destroyRect(lgbtq, human1, human2, label);
     });
 
 }
-function destroyRect(boy, girl, label) {
+function destroyRect(lgbtq, human1, human2, label) {
     // if (rect.opacity > 0) {
     //     rect.opacity -= 0.1;
     // }
-    boy.opacity = 0;
-    boy.modified();
-    girl.opacity = 0;
-    girl.modified();
-    point++;
+    human1.opacity = 0;
+    human1.modified();
+    human2.opacity = 0;
+    human2.modified();
+    if (lgbtq === GAY || lgbtq === BIAN) {
+        point--;
+    } else {
+        point++;
+    }
     label.text = point + "pt";
     label.invalidate();
   }

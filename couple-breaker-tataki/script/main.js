@@ -113,8 +113,8 @@ function showCouple(label, scene) {
         human1.y += 3;
         human2.y += 3;
         if (g.game.height < human1.y) {
-            human1.y = 0;
-            human2.y = 0;
+            human1.y = g.game.height;
+            human2.y = g.game.height;
         }
         human1.modified();
         human1.modified();

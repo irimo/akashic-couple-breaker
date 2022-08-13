@@ -1,6 +1,7 @@
 let point = 0;
 const GAY = 8;
 const BIAN = 9;
+const CHILD = 0;
 function main(param) {
     let scene = new g.Scene({
         game: g.game,
@@ -111,6 +112,7 @@ function showCouple(label, scene, danImageAsset, joImageAsset, bakuhatsuImageAss
     let start_x = g.game.random.get(0, g.game.width - human_width * 2)
     let lgbtq = g.game.random.get(0, 9);
     let speed = g.game.random.get(1, 20);
+    let age = g.game.random.get(0, 10);
     
     let group_couple = new g.E({ scene: scene });
 
@@ -126,6 +128,11 @@ function showCouple(label, scene, danImageAsset, joImageAsset, bakuhatsuImageAss
     let human1 = null;
     let human2 = null;
 
+    let scale = 1.0;
+    if (age === CHILD) {
+        scale = 0.7;
+    }
+
     if (lgbtq === BIAN) {
         human1 = new g.Sprite({
             scene: scene,
@@ -135,7 +142,9 @@ function showCouple(label, scene, danImageAsset, joImageAsset, bakuhatsuImageAss
             x: start_x + human_width,
             y: 0,
             anchorX: 1.0,
-            anchorY: 1.0
+            anchorY: 1.0,
+            scaleX: scale,
+            scaleY: scale
         });
     } else {
         human1 = new g.Sprite({
@@ -146,7 +155,9 @@ function showCouple(label, scene, danImageAsset, joImageAsset, bakuhatsuImageAss
             x: start_x + human_width,
             y: 0,
             anchorX: 1.0,
-            anchorY: 1.0
+            anchorY: 1.0,
+            scaleX: scale,
+            scaleY: scale
         });
     }
     if (lgbtq === GAY) {
@@ -158,7 +169,9 @@ function showCouple(label, scene, danImageAsset, joImageAsset, bakuhatsuImageAss
             x: start_x + human_width,
             y: 0,
             anchorX: 0.0,
-            anchorY: 1.0
+            anchorY: 1.0,
+            scaleX: scale,
+            scaleY: scale
         });
     } else {
         human2 = new g.Sprite({
@@ -169,7 +182,9 @@ function showCouple(label, scene, danImageAsset, joImageAsset, bakuhatsuImageAss
             x: start_x + human_width,
             y: 0,
             anchorX: 0.0,
-            anchorY: 1.0
+            anchorY: 1.0,
+            scaleX: scale,
+            scaleY: scale
         });
     }
     var bakuhatsu = new g.Sprite({
@@ -198,24 +213,25 @@ function showCouple(label, scene, danImageAsset, joImageAsset, bakuhatsuImageAss
         human1.y += speed;
         if (g.game.height + 300 < human1.y) {
             // human1.y = g.game.height;
-            group_couple.destroy();
+            // group_couple.destroy();
+        } else {
+            human2.y = human1.y;
+            bakuhatsu.y = human1.y;
+            human1.modified();
+            human2.modified();
+            bakuhatsu.modified();
         }
-        human2.y = human1.y;
-        bakuhatsu.y = human1.y;
-        human1.modified();
-        human2.modified();
-        bakuhatsu.modified();
     });
 
     human1.onPointUp.add(() => {
         bakuhatsu.opacity = 1.0;
         bakuhatsu.modified();
-        destroyRect(lgbtq, label, group_couple, scene);
+        destroyRect(lgbtq, label, group_couple, scene, human1.y);
     });
     human2.onPointUp.add(() => {
         bakuhatsu.opacity = 1.0;
         bakuhatsu.modified();
-        destroyRect(lgbtq, label, group_couple, scene);
+        destroyRect(lgbtq, label, group_couple, scene, human1.y);
     });
 }
 
@@ -242,7 +258,7 @@ function setBg(group_bg_back, scene) {
     }
 }
 
-function destroyRect(lgbtq, label, group_couple, scene) {
+function destroyRect(lgbtq, label, group_couple, scene, y) {
     // if (rect.opacity > 0) {
     //     rect.opacity -= 0.1;
     // }
@@ -253,14 +269,14 @@ function destroyRect(lgbtq, label, group_couple, scene) {
     // human2.opacity = 0;
     // human2.modified();
     if (lgbtq === GAY || lgbtq === BIAN) {
-        point-=100;
+        point -= 100;
     } else {
-        point+=100;
+        point += (1000 - y);
     }
     // scene.onUpdate.remove();
     scene.setTimeout(() => {
         group_couple.destroy();
-        point-=100;
+        point -= 100;
     }, 500);
     label.text = point + "pt";
     label.invalidate();

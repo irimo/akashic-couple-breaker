@@ -50,6 +50,12 @@
 			"path": "image/jo.png",
 			"width": 48,
 			"height": 99
+		},
+		"bomb": {
+			"type": "audio",
+			"path": "audio/bomb",
+			"systemId": "sound",
+			"duration": 3356
 		}
 	},
 	"moduleMainScripts": {},

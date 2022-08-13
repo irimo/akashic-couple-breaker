@@ -51,11 +51,17 @@
 			"width": 48,
 			"height": 99
 		},
-		"bomb": {
+		"bomber": {
 			"type": "audio",
-			"path": "audio/bomb",
+			"path": "audio/bomber",
 			"systemId": "sound",
 			"duration": 3356
+		},
+		"honsya": {
+			"type": "image",
+			"path": "image/honsya.png",
+			"width": 98,
+			"height": 99
 		}
 	},
 	"moduleMainScripts": {},

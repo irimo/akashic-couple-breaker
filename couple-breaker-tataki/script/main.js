@@ -6,17 +6,18 @@ function main(param) {
     let scene = new g.Scene({
         game: g.game,
         // このシーンで利用するアセットのIDを列挙し、シーンに通知します
-        assetIds: ["hotel", "dan", "jo", "bakuhatsu"]
+        assetIds: ["hotel", "dan", "jo", "bakuhatsu", "bomber", "honsya"]
     });
     scene.onLoad.add(function () {
-
+        // g.game.audio.sound.volume = 0.25;
         // ここからゲーム内容を記述します
         // 各アセットオブジェクトを取得します
         var hotelImageAsset = scene.asset.getImageById("hotel");
         var bakuhatsuImageAsset = scene.asset.getImageById("bakuhatsu");
         var danImageAsset = scene.asset.getImageById("dan");
         var joImageAsset = scene.asset.getImageById("jo");
-        // var seAudioAsset = scene.asset.getAudioById("se");
+        var honsyaImageAsset = scene.asset.getImageById("honsya");
+        var bombAudioAsset = scene.asset.getAudioById("bomber");
         // // プレイヤーを生成します
         var hotel = new g.Sprite({
             scene: scene,
@@ -102,12 +103,16 @@ function main(param) {
         // ここまでゲーム内容を記述します
 
         scene.setInterval(() => {
-            showCouple(label, scene, danImageAsset, joImageAsset, bakuhatsuImageAsset, group_score);
-        }, 1000);        
+            showCouple(label, scene, danImageAsset, joImageAsset, bakuhatsuImageAsset, group_score, bombAudioAsset);
+        }, 1000);
+        
+        scene.setTimeout(() => {
+            showHonsya(label, scene, honsyaImageAsset, bakuhatsuImageAsset, group_score, bombAudioAsset);
+        }, 2000);    
 });
     g.game.pushScene(scene);
 }
-function showCouple(label, scene, danImageAsset, joImageAsset, bakuhatsuImageAsset, group_score) {
+function showCouple(label, scene, danImageAsset, joImageAsset, bakuhatsuImageAsset, group_score, bombAudioAsset) {
     let human_width = 48;
     let start_x = g.game.random.get(0, g.game.width - human_width * 2)
     let lgbtq = g.game.random.get(0, 9);
@@ -198,7 +203,7 @@ function showCouple(label, scene, danImageAsset, joImageAsset, bakuhatsuImageAss
         x: human1.x,
         // y: human1.y,
         anchorX: 0.5,
-        anchorY: 1.0,
+        anchorY: 0.75,
         opacity: 0.0
     });
     human1.touchable = true;
@@ -226,12 +231,64 @@ function showCouple(label, scene, danImageAsset, joImageAsset, bakuhatsuImageAss
     human1.onPointUp.add(() => {
         bakuhatsu.opacity = 1.0;
         bakuhatsu.modified();
-        destroyRect(lgbtq, label, group_couple, scene, human1.y);
+        destroyRect(lgbtq, label, group_couple, scene, human1.y, bombAudioAsset);
     });
     human2.onPointUp.add(() => {
         bakuhatsu.opacity = 1.0;
         bakuhatsu.modified();
-        destroyRect(lgbtq, label, group_couple, scene, human1.y);
+        destroyRect(lgbtq, label, group_couple, scene, human1.y, bombAudioAsset);
+    });
+}
+function showHonsya(label, scene, honsyaImageAsset, bakuhatsuImageAsset, group_score, bombAudioAsset) {
+
+    let start_x = g.game.random.get(0, g.game.width - honsyaImageAsset.width)
+    let group_couple = new g.E({ scene: scene });
+    let honsya = new g.Sprite({
+        scene: scene,
+        src: honsyaImageAsset,
+        width: honsyaImageAsset.width,
+        height: honsyaImageAsset.height,
+        x: start_x,
+        y: 0,
+        anchorX: 0.5,
+        anchorY: 1.0
+    });
+    
+    var bakuhatsu = new g.Sprite({
+        scene: scene,
+        src: bakuhatsuImageAsset,
+        width: bakuhatsuImageAsset.width,
+        height: bakuhatsuImageAsset.height,
+        // parent: group_couple,
+        // x: 0,
+        y: 0,
+        x: start_x,
+        // y: human1.y,
+        anchorX: 0.5,
+        anchorY: 0.75,
+        opacity: 0.0
+    });
+    
+    group_couple.append(honsya);
+    group_couple.append(bakuhatsu);
+    scene.insertBefore(group_couple, group_score);
+
+    scene.onUpdate.add(() => {
+        honsya.y += 10;
+        if (g.game.height + 300 < honsya.y) {
+            bakuhatsu.y = honsya.y;
+            // human1.y = g.game.height;
+            // group_couple.destroy();
+        } else {
+            honsya.modified();
+            bakuhatsu.modified();
+        }
+    });
+
+    honsya.onPointUp.add(() => {
+        bakuhatsu.opacity = 1.0;
+        bakuhatsu.modified();
+        destroyRect(0, label, group_couple, scene, honsya.y, bombAudioAsset);
     });
 }
 
@@ -258,7 +315,7 @@ function setBg(group_bg_back, scene) {
     }
 }
 
-function destroyRect(lgbtq, label, group_couple, scene, y) {
+function destroyRect(lgbtq, label, group_couple, scene, y, bombAudioAsset) {
     // if (rect.opacity > 0) {
     //     rect.opacity -= 0.1;
     // }
@@ -268,8 +325,11 @@ function destroyRect(lgbtq, label, group_couple, scene, y) {
     // human1.modified();
     // human2.opacity = 0;
     // human2.modified();
+    // bombAudioAsset.changeVolume(0.4);
+    bombAudioAsset.play().changeVolume(0.01);
+    // bombAudioAsset.play();
     if (lgbtq === GAY || lgbtq === BIAN) {
-        point -= 100;
+        point -= 1000;
     } else {
         point += (1000 - y);
     }

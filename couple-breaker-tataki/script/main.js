@@ -335,7 +335,11 @@ function destroyRect(lgbtq, label, group_couple, scene, y, bombAudioAsset) {
     }
     // scene.onUpdate.remove();
     scene.setTimeout(() => {
-        group_couple.destroy();
+        if (group_couple) {
+            console.log("destroy");
+            group_couple.destroy();
+            group_couple = null;
+        }
         point -= 100;
     }, 500);
     label.text = point + "pt";

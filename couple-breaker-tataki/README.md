@@ -65,3 +65,6 @@ npm install
 ```sh
 npm run lint
 ```
+# 動作
+
+akashic serve

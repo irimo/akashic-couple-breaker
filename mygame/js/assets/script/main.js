@@ -1,3 +1,4 @@
+window.gLocalAssetContainer["main"] = function(g) { (function(exports, require, module, __filename, __dirname) {
 let point = 0;
 const GAY = 8;
 const BIAN = 9;
@@ -352,3 +353,6 @@ function destroyRect(lgbtq, label, group_couple, scene, y, bombAudioAsset) {
     label.invalidate();
   }
 module.exports = main;
+
+})(g.module.exports, g.module.require, g.module, g.filename, g.dirname);
+}

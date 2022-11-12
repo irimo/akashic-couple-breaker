@@ -62,10 +62,30 @@
 			"path": "image/honsya.png",
 			"width": 98,
 			"height": 99
+		},
+		"explain": {
+			"type": "image",
+			"path": "image/explain.png",
+			"width": 1280,
+			"height": 720
+		},
+		"thumb-alpha": {
+			"type": "image",
+			"path": "image/thumb-alpha.png",
+			"width": 250,
+			"height": 250
 		}
 	},
 	"moduleMainScripts": {},
 	"environment": {
-		"sandbox-runtime": "3"
+		"sandbox-runtime": "3",
+		"niconico": {
+			"supportedModes": [
+				"ranking"
+			],
+			"preferredSessionParameters": {
+				"totalTimeLimit": 70
+			}
+		}
 	}
 }

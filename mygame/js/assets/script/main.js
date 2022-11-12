@@ -7,8 +7,12 @@ function main(param) {
     let scene = new g.Scene({
         game: g.game,
         // このシーンで利用するアセットのIDを列挙し、シーンに通知します
-        assetIds: ["hotel", "dan", "jo", "bakuhatsu", "bomber", "honsya"]
+        assetIds: ["hotel", "dan", "jo", "bakuhatsu", "bomber", "honsya", "explain"]
     });
+    var time = 60; // 制限時間
+    let group_explain;
+    let explain_appear = true;
+
     scene.onLoad.add(function () {
         // g.game.audio.sound.volume = 0.25;
         // ここからゲーム内容を記述します
@@ -18,7 +22,9 @@ function main(param) {
         var danImageAsset = scene.asset.getImageById("dan");
         var joImageAsset = scene.asset.getImageById("jo");
         var honsyaImageAsset = scene.asset.getImageById("honsya");
+        var explainImageAsset = scene.asset.getImageById("explain");
         var bombAudioAsset = scene.asset.getAudioById("bomber");
+
         // // プレイヤーを生成します
         var hotel = new g.Sprite({
             scene: scene,
@@ -65,43 +71,18 @@ function main(param) {
         group_bg_front.append(hotel);
         scene.append(group_bg_front);
 
+        let explain = new g.Sprite({
+            scene: scene,
+            src: explainImageAsset,
+            width: explainImageAsset.width,
+            height: explainImageAsset.height,
+            x: 0,
+            y: 0
+        });
 
-        // プレイヤーの初期座標を、画面の中心に設定します
-        // player.x = (g.game.width - player.width) / 2;
-        // player.y = (g.game.height - player.height) / 2;
-        // player.onUpdate.add(function () {
-        //     // 毎フレームでY座標を再計算し、プレイヤーの飛んでいる動きを表現します
-        //     // ここではMath.sinを利用して、時間経過によって増加するg.game.ageと組み合わせて
-        //     player.y = (g.game.height - player.height) / 2 + Math.sin(g.game.age % (g.game.fps * 10) / 4) * 10;
-        //     // プレイヤーの座標に変更があった場合、 modified() を実行して変更をゲームに通知します
-        //     player.modified();
-        // });
-        // // 画面をタッチしたとき、SEを鳴らします
-        // scene.onPointDownCapture.add(function () {
-        //     seAudioAsset.play();
-        //     // プレイヤーが発射する弾を生成します
-        //     var shot = new g.Sprite({
-        //         scene: scene,
-        //         src: shotImageAsset,
-        //         width: shotImageAsset.width,
-        //         height: shotImageAsset.height
-        //     });
-        //     // 弾の初期座標を、プレイヤーの少し右に設定します
-        //     shot.x = player.x + player.width;
-        //     shot.y = player.y;
-        //     shot.onUpdate.add(function () {
-        //         // 毎フレームで座標を確認し、画面外に出ていたら弾をシーンから取り除きます
-        //         if (shot.x > g.game.width)
-        //             shot.destroy();
-        //         // 弾を右に動かし、弾の動きを表現します
-        //         shot.x += 10;
-        //         // 変更をゲームに通知します
-        //         shot.modified();
-        //     });
-        //     scene.append(shot);
-        // });
-        // scene.append(player);
-        // ここまでゲーム内容を記述します
+        group_explain = new g.E({ scene: scene });
+        group_explain.append(explain);
+        scene.append(group_explain);
 
         scene.setInterval(() => {
             showCouple(label, scene, danImageAsset, joImageAsset, bakuhatsuImageAsset, group_score, bombAudioAsset);
@@ -109,8 +90,31 @@ function main(param) {
         
         scene.setTimeout(() => {
             showHonsya(label, scene, honsyaImageAsset, bakuhatsuImageAsset, group_score, bombAudioAsset);
-        }, 2000);    
-});
+        }, 15000);
+    });
+    let updateHandler = function () {
+        if (time < 57) {
+            if (explain_appear == true) {
+                group_explain.destroy();
+            }
+            explain_appear = false;
+        }
+        if (time <= 0) {
+            // RPGアツマール環境であればランキングを表示します
+            if (param.isAtsumaru) {
+                var boardId_1 = 1;
+                window.RPGAtsumaru.experimental.scoreboards.setRecord(boardId_1, g.game.vars.gameState.score).then(function () {
+                    window.RPGAtsumaru.experimental.scoreboards.display(boardId_1);
+                });
+            }
+            scene.onUpdate.remove(updateHandler); // カウントダウンを止めるためにこのイベントハンドラを削除します
+        }
+        // カウントダウン処理
+        time -= 1 / g.game.fps;
+    };
+    scene.onUpdate.add(updateHandler);
+    // ここまでゲーム内容を記述します
+
     g.game.pushScene(scene);
 }
 function showCouple(label, scene, danImageAsset, joImageAsset, bakuhatsuImageAsset, group_score, bombAudioAsset) {
@@ -122,15 +126,6 @@ function showCouple(label, scene, danImageAsset, joImageAsset, bakuhatsuImageAss
     
     let group_couple = new g.E({ scene: scene });
 
-    // let human2 = new g.FilledRect({
-    //     scene: scene,
-    //     cssColor: "red",
-    //     width: human_width,
-    //     height: 50,
-    //     x: start_x + human_width,
-    //     y: 0,
-    //     opacity: 1
-    // });
     let human1 = null;
     let human2 = null;
 
@@ -217,10 +212,7 @@ function showCouple(label, scene, danImageAsset, joImageAsset, bakuhatsuImageAss
 
     scene.onUpdate.add(() => {
         human1.y += speed;
-        if (g.game.height + 300 < human1.y) {
-            // human1.y = g.game.height;
-            // group_couple.destroy();
-        } else {
+        if (g.game.height + 300 > human1.y) {
             human2.y = human1.y;
             bakuhatsu.y = human1.y;
             human1.modified();
@@ -282,11 +274,8 @@ function showHonsya(label, scene, honsyaImageAsset, bakuhatsuImageAsset, group_s
 
     scene.onUpdate.add(() => {
         honsya.y += 10;
-        if (g.game.height + 300 < honsya.y) {
+        if (g.game.height + 300 > honsya.y) {
             bakuhatsu.y = honsya.y;
-            // human1.y = g.game.height;
-            // group_couple.destroy();
-        } else {
             honsya.modified();
             bakuhatsu.modified();
         }
@@ -309,6 +298,16 @@ function setBg(group_bg_back, scene) {
     });
     let w_width = 25;
 
+    const rect_bg = new g.FilledRect({
+        scene,
+        cssColor: "white",
+        x: 0,
+        y: 0,
+        width: g.game.width,
+        height: g.game.height,
+        parent: group_bg_back
+      });
+
     for (let y=0; y < g.game.height / w_width; y++) {
         let label = new g.Label({
             scene: scene,
@@ -324,16 +323,7 @@ function setBg(group_bg_back, scene) {
 }
 
 function destroyRect(lgbtq, label, group_couple, scene, y, bombAudioAsset) {
-    // if (rect.opacity > 0) {
-    //     rect.opacity -= 0.1;
-    // }
-    // console.log(human1.x);
-    // group_couple.append(bakuhatsu);
-    // human1.opacity = 0;
-    // human1.modified();
-    // human2.opacity = 0;
-    // human2.modified();
-    // bombAudioAsset.changeVolume(0.4);
+
     bombAudioAsset.play().changeVolume(0.01);
     // bombAudioAsset.play();
     if (lgbtq === GAY || lgbtq === BIAN) {
